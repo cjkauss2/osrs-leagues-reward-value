@@ -3,12 +3,19 @@ import json
 import requests
 from pathlib import Path
 
-API_URL = "https://prices.runescape.wiki/api/v1/osrs/mapping"
+MAPPING_API_URL = "https://prices.runescape.wiki/api/v1/osrs/mapping"
+MAPPING_API_USER_AGENT = "leagues-rewards-value"
+MAPPING_API_TIMEOUT = 30
+
 OUTPUT_FILE = Path("data/item_mapping.json")
 
 
 def main():
-    response = requests.get(API_URL, timeout=30)
+    response = requests.get(
+        MAPPING_API_URL, 
+        headers={"User-Agent": MAPPING_API_USER_AGENT},
+        timeout=MAPPING_API_TIMEOUT
+    )
     response.raise_for_status()
 
     data = response.json()
