@@ -65,9 +65,38 @@ leagues_rewards[["High Price", "Low Price", "Avg Price"]] = (
     .apply(lambda item_id: pd.Series(get_item_prices(item_id)))
 )
 
+# Manual calculations for T3 sets which come with a cane
+print("Calculating T3 armour sets")
+
+leagues_rewards.loc[
+    leagues_rewards["Item Name"].str.lower() == "twisted relic hunter (t3) armour set",
+    ["High Price", "Low Price", "Avg Price"]
+] += get_item_prices(24395)
+leagues_rewards.loc[
+    leagues_rewards["Item Name"].str.lower() == "trailblazer relic hunter (t3) armour set",
+    ["High Price", "Low Price", "Avg Price"]
+] += get_item_prices(25013)
+leagues_rewards.loc[
+    leagues_rewards["Item Name"].str.lower() == "shattered relic hunter (t3) armour set",
+    ["High Price", "Low Price", "Avg Price"]
+] += get_item_prices(26517)
+leagues_rewards.loc[
+    leagues_rewards["Item Name"].str.lower() == "trailblazer reloaded relic hunter (t3) armour set",
+    ["High Price", "Low Price", "Avg Price"]
+] += get_item_prices(28748)
+leagues_rewards.loc[
+    leagues_rewards["Item Name"].str.lower() == "raging echoes relic hunter (t3) armour set",
+    ["High Price", "Low Price", "Avg Price"]
+] += get_item_prices(30428)
+leagues_rewards.loc[
+    leagues_rewards["Item Name"].str.lower() == "demonic pacts relic hunter (t3) armour set",
+    ["High Price", "Low Price", "Avg Price"]
+] += get_item_prices(33296)
+
 # Calculate total value of reward
 leagues_rewards["gp"] = leagues_rewards["High Price"] * leagues_rewards["Quantity"]
-leagues_rewards["gp_per_point"] = leagues_rewards["gp"] / leagues_rewards["Quantity"]
+leagues_rewards["gp_per_point"] = leagues_rewards["gp"] / leagues_rewards["Points"]
+
 
 # Generate filename with today's date
 date_str = datetime.now().strftime("%Y%m%d")
