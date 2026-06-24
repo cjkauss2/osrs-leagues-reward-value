@@ -1,4 +1,6 @@
 import json
+import requests
+import webbrowser
 from typing import Optional, Tuple
 
 # API configuration (adjust as needed)
@@ -7,14 +9,13 @@ PRICE_API_USER_AGENT = "unusual-money-makers"
 PRICE_API_TIMEOUT = 10
 MONEY_MAKER_JSON_PATH = "data/money_makers.json"
 ITEM_MAPPING_JSON_PATH = "data/item_mapping.json"
+GE_PRICES_URL = "https://prices.runescape.wiki/osrs/item"
 
 
 def get_item_prices(item_id: int) -> Tuple[Optional[int], Optional[int], Optional[float]]:
     """
     Returns (high_price, low_price, avg_price) for an OSRS item.
     """
-    import requests
-
     if not item_id:
         return None, None, None
 
@@ -111,7 +112,8 @@ def main():
             material_details.append({
                 "name": material_name,
                 "quantity": material_quantity,
-                "low_price": material_low
+                "low_price": material_low,
+                "item_id": material_id
             })
         else:
             # All materials were found and priced successfully
@@ -125,6 +127,7 @@ def main():
 
             results.append({
                 "product_name": product_name,
+                "product_id": product_id,
                 "product_high_price": product_high,
                 "profit_per_action": profit_per_action,
                 "profit_per_hour": profit_per_hour,
@@ -134,7 +137,7 @@ def main():
             })
 
     # Sort by profit per hour (descending)
-    results.sort(key=lambda x: x["profit_per_hour"], reverse=True)
+    results.sort(key=lambda x: x["profit_per_hour"])
 
     # Print summary
     print("\n" + "=" * 120)
@@ -151,6 +154,41 @@ def main():
             print(f"      - {material['name']}: {material['quantity']} x {material['low_price']:,} gp = {material['quantity'] * material['low_price']:,} gp")
 
     print("\n" + "=" * 120)
+
+    # Prompt user for opening wiki pages
+    print(f"\nTotal money makers: {len(results)}")
+    try:
+        user_input = input("How many would you like to open in your browser?")
+        num_to_open = int(user_input)
+        
+        if num_to_open <= 0:
+            print("Exiting.")
+            return
+        
+        # Get the top N most profitable (from the end of results, since they're sorted ascending)
+        num_to_open = min(num_to_open, len(results))
+        most_profitable = results[-num_to_open:]
+        most_profitable.reverse()
+
+        print(f"\nOpening wiki pages for top {num_to_open} money maker(s)...")
+        for result in most_profitable:
+            # Open material pages
+            for material in result["material_details"]:
+                material_url = f"https://prices.runescape.wiki/osrs/item/{material['item_id']}"
+                webbrowser.open(material_url)
+
+            # Open product page
+            product_url = f"{GE_PRICES_URL}/{result['product_id']}"
+            webbrowser.open(product_url)
+        
+        print("Done!")
+        
+    except ValueError:
+        print("Invalid input. Exiting script.")
+        return
+    except KeyboardInterrupt:
+        print("\n\nExiting.")
+        return
 
 
 if __name__ == "__main__":
